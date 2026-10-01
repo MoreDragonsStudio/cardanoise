@@ -36,7 +36,17 @@ export function buildPattern({ liveValue, liveState }) {
   const hatsN = liveValue(() =>
     Math.max(1, Math.min(8, Math.round(1 + (latest()?.txNorm ?? 0) * 7))),
   );
-  const rootNote = liveValue(() => ROOTS[(latest()?.seed ?? 0) % ROOTS.length]);
+
+  // Root note is quantised to the next bar boundary (see liveState's
+  // chordEvent / strudelEngine's bar-boundary loop), not updated the
+  // instant a block arrives — "change chord on the next bar boundary", per
+  // the spec. The filter release and fill below react immediately instead.
+  const rootNote = liveValue(() => ROOTS[(liveState.getChordEvent()?.seed ?? 0) % ROOTS.length]);
+
+  // A block landing is the release: for one bar, layer in an extra
+  // off-beat noise fill. isFillActive() is cleared the instant the chord
+  // advances, so the fill always covers exactly "until the next bar".
+  const fillOn = liveValue(() => (liveState.isFillActive() ? 1 : 0));
 
   // Steady four-on-the-floor kick, regardless of chain activity: a sine
   // with a fast downward pitch sweep (the classic synthesized-kick idiom).
@@ -74,5 +84,14 @@ export function buildPattern({ liveValue, liveState }) {
     .s('sine')
     .gain(adaNorm.range(0.25, 0.95).segment(16));
 
-  return stack(kick, hats, bass, sub);
+  // The fill: busy 16th-note noise stabs, silent except for the one bar
+  // right after a block arrives.
+  const fill = sound('white*16')
+    .hpf(5000)
+    .decay(0.01)
+    .sustain(0)
+    .release(0.01)
+    .gain(fillOn.mul(0.35).segment(16));
+
+  return stack(kick, hats, bass, sub, fill);
 }
