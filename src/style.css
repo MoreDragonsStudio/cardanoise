@@ -30,6 +30,25 @@ h1 {
   color: var(--accent);
 }
 
+.tune-in {
+  display: block;
+  margin: 0 0 1.5rem;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--bg);
+  background: var(--accent);
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.tune-in:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
 .now-playing {
   display: grid;
   grid-template-columns: 1fr 1fr;
