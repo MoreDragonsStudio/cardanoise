@@ -49,6 +49,12 @@ h1 {
   cursor: wait;
 }
 
+canvas.visualiser {
+  display: block;
+  margin: 0 auto 1.5rem;
+  max-width: 100%;
+}
+
 .now-playing {
   display: grid;
   grid-template-columns: 1fr 1fr;
